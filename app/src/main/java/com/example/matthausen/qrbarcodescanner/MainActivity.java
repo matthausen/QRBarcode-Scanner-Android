@@ -13,9 +13,14 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.MotionEvent;
+import android.widget.ArrayAdapter;
 import android.widget.Toast;
 
 import com.google.zxing.Result;
+import com.google.zxing.common.StringUtils;
+
+import java.util.ArrayList;
+import java.util.stream.Stream;
 
 import me.dm7.barcodescanner.zxing.ZXingScannerView;
 
@@ -27,12 +32,14 @@ public class MainActivity extends AppCompatActivity implements ZXingScannerView.
     private static final int REQUEST_CAMERA = 1;
     private ZXingScannerView scannerView;
     float x1, x2, y1, y2;
+    DBHelper dbHelper;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         scannerView = new ZXingScannerView(this);
         setContentView(scannerView);
+        dbHelper = new DBHelper(this);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
         {
@@ -154,6 +161,24 @@ public class MainActivity extends AppCompatActivity implements ZXingScannerView.
     @Override
     public void handleResult(Result result) {
         final String scanResult = result.getText();
+        loadTaskList();
+        //Check if the can results contain the allergens
+        System.out.println("Now printing: " + scanResult);
+        ArrayList<String> taskList = dbHelper.getTaskList();
+        if(taskList.size() > 0 )
+        {
+            for(String allergy : taskList) {
+                if (scanResult.contains(allergy)) {
+                    System.out.println("Allergy found: " + allergy);
+                    Toast.makeText(this, "Allergy found: " + allergy , Toast.LENGTH_LONG).show();
+                } else {
+                    System.out.println("This item is suitable for your diet");
+                    Toast.makeText(this, "This item is suitable for your diet", Toast.LENGTH_LONG).show();
+                }
+            }
+        } else {
+            Toast.makeText(this, "You have entered no allergies in your list", Toast.LENGTH_SHORT).show();
+        }
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("Scan Results");
         builder.setPositiveButton("OK", new DialogInterface.OnClickListener(){
@@ -172,5 +197,9 @@ public class MainActivity extends AppCompatActivity implements ZXingScannerView.
         builder.setMessage(scanResult);
         AlertDialog alert = builder.create();
         alert.show();
+    }
+    private void loadTaskList() {
+        ArrayList<String> taskList = dbHelper.getTaskList();
+
     }
 }
