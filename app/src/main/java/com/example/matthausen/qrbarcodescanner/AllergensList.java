@@ -90,7 +90,7 @@ public class AllergensList extends AppCompatActivity{
             case R.id.action_add_task:
                 final EditText taskEditText = new EditText(this);
                 AlertDialog dialog = new AlertDialog.Builder(this)
-                        .setTitle("Add New Task")
+                        .setTitle("Add New allergy or intolerance")
                         .setMessage("What do you want to do next?")
                         .setView(taskEditText)
                         .setPositiveButton("Add", new DialogInterface.OnClickListener() {
